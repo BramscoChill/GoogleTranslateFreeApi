@@ -1,6 +1,10 @@
 # GoogleTranslateFreeApi
 Api for free text translation using Google translate.
 
+This repo is exactly the same as the one from <a href="https://github.com/BramscoChill/GoogleTranslateFreeApi/commits?author=Grizley56">Grizley56</a>, bud with a good ban prevention. When you use this free api without this ban prevention, you will get blocked after like 20 requests or so. This mechanism prevents this and you will not get blocked for a couple hours. It keeps on working.
+
+I tried to contact Grizley56, bud he did not respond.
+
 Main features:
 - [x] Text corrections
 - [x] Language corrections
