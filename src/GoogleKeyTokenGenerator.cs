@@ -80,60 +80,121 @@ namespace GoogleTranslateFreeApi
 			return time.ToString() + '.' + (time ^ _currentExternalKey.Time);
 		}
 
-		protected virtual async Task<ExternalKey> GetNewExternalKeyAsync()
-		{
-			HttpWebRequest request = WebRequest.CreateHttp(_address);
-			HttpWebResponse response;
-			request.Proxy = Proxy;
-			request.ContinueTimeout = (int)TimeOut.TotalMilliseconds;
-			request.ContentType = "application/x-www-form-urlencoded";
-
-			
-			try
-			{
-				response = (HttpWebResponse) await request.GetResponseAsync();
-			}
-			catch (WebException e)
-			{
-				if((int)e.Status == 7) //ProtocolError
-					throw new GoogleTranslateIPBannedException(
-						GoogleTranslateIPBannedException.Operation.TokenGeneration);
-				
-				throw;
-			}
-			
-			string result;
-
-			using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
-				result = await streamReader.ReadToEndAsync();
+	    //https://github.com/matheuss/google-translate-token#readme
+	    protected virtual async Task<ExternalKey> GetNewExternalKeyAsync()
+	    {
+	        HttpWebRequest request = WebRequest.CreateHttp(_address);
+	        HttpWebResponse response;
+	        request.Proxy = Proxy;
+	        request.ContinueTimeout = (int)TimeOut.TotalMilliseconds;
+	        request.ContentType = "application/x-www-form-urlencoded";
 
 
-			long number1, number2;
-			string textNumber1, textNumber2;
+	        try
+	        {
+	            response = (HttpWebResponse)await request.GetResponseAsync();
+	        }
+	        catch (WebException e)
+	        {
+	            if ((int)e.Status == 7) //ProtocolError
+	                throw new GoogleTranslateIPBannedException(
+	                    GoogleTranslateIPBannedException.Operation.TokenGeneration);
 
-			try
-			{
-				int index = result.IndexOf((@"var a\x3d"), StringComparison.Ordinal);
-				textNumber1 = result.GetTextBetween(@"var a\x3d", ";", index);
-				textNumber2 = result.GetTextBetween(@"var b\x3d", ";", index);
-				
-				if(textNumber1 == null || textNumber2 == null)
-					throw new ExternalKeyParseException();
-			}
-			catch (ArgumentException)
-			{
-				throw new ExternalKeyParseException();
-			}
+	            throw;
+	        }
+
+	        string result;
+
+	        using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+	            result = await streamReader.ReadToEndAsync();
 
 
-			if (!long.TryParse(textNumber1, out number1) || !long.TryParse(textNumber2, out number2))
-				throw new ExternalKeyParseException();
+	        long number;
+	        string textNumber;
 
-			ExternalKey newExternalKey = new ExternalKey(UnixTotalHours, number1 + number2);
-			return newExternalKey;
-		}
-		
-		[DebuggerHidden]
+	        try
+	        {
+	            //get the token changed
+	            //https://github.com/matheuss/google-translate-token#readme
+	            int index = result.IndexOf((@"TKK="), StringComparison.Ordinal);
+	            textNumber = result.GetTextBetween(@"TKK=", ";", index).Replace("\'", "").Split(new[] { '.' })[1];
+
+	            //				int index = result.IndexOf((@"var a\x3d"), StringComparison.Ordinal);
+	            //				textNumber1 = result.GetTextBetween(@"var a\x3d", ";", index);
+	            //				textNumber2 = result.GetTextBetween(@"var b\x3d", ";", index);
+
+
+	            if (textNumber == null)
+	                throw new ExternalKeyParseException();
+	        }
+	        catch (ArgumentException)
+	        {
+	            throw new ExternalKeyParseException();
+	        }
+
+
+	        if (!long.TryParse(textNumber, out number))
+	            throw new ExternalKeyParseException();
+
+	        //ExternalKey newExternalKey = new ExternalKey(UnixTotalHours, number1 + number2);
+	        ExternalKey newExternalKey = new ExternalKey(UnixTotalHours, number);
+	        return newExternalKey;
+	    }
+
+        //		protected virtual async Task<ExternalKey> GetNewExternalKeyAsync()
+        //		{
+        //			HttpWebRequest request = WebRequest.CreateHttp(_address);
+        //			HttpWebResponse response;
+        //			request.Proxy = Proxy;
+        //			request.ContinueTimeout = (int)TimeOut.TotalMilliseconds;
+        //			request.ContentType = "application/x-www-form-urlencoded";
+        //
+        //			
+        //			try
+        //			{
+        //				response = (HttpWebResponse) await request.GetResponseAsync();
+        //			}
+        //			catch (WebException e)
+        //			{
+        //				if((int)e.Status == 7) //ProtocolError
+        //					throw new GoogleTranslateIPBannedException(
+        //						GoogleTranslateIPBannedException.Operation.TokenGeneration);
+        //				
+        //				throw;
+        //			}
+        //			
+        //			string result;
+        //
+        //			using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+        //				result = await streamReader.ReadToEndAsync();
+        //
+        //
+        //			long number1, number2;
+        //			string textNumber1, textNumber2;
+        //
+        //			try
+        //			{
+        //				int index = result.IndexOf((@"var a\x3d"), StringComparison.Ordinal);
+        //				textNumber1 = result.GetTextBetween(@"var a\x3d", ";", index);
+        //				textNumber2 = result.GetTextBetween(@"var b\x3d", ";", index);
+        //				
+        //				if(textNumber1 == null || textNumber2 == null)
+        //					throw new ExternalKeyParseException();
+        //			}
+        //			catch (ArgumentException)
+        //			{
+        //				throw new ExternalKeyParseException();
+        //			}
+        //
+        //
+        //			if (!long.TryParse(textNumber1, out number1) || !long.TryParse(textNumber2, out number2))
+        //				throw new ExternalKeyParseException();
+        //
+        //			ExternalKey newExternalKey = new ExternalKey(UnixTotalHours, number1 + number2);
+        //			return newExternalKey;
+        //		}
+
+        [DebuggerHidden]
 		private long DecrypthAlgorythm(string source)
 		{
 
