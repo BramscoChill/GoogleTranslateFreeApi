@@ -24,8 +24,8 @@ namespace GoogleTranslateFreeApi
 			if (index == -1)
 				return null;
 
-			int index2 = src.IndexOf(to, index, StringComparison.Ordinal);
-			if (index2 == -1)
+		    int index2 = src.IndexOf(to, index + from.Length, StringComparison.Ordinal);
+            if (index2 == -1)
 				return null;
 
 			var result = src.Substring(index + from.Length, index2 - index - from.Length);

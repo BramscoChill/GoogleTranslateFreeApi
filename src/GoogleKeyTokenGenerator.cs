@@ -114,17 +114,17 @@ namespace GoogleTranslateFreeApi
 
 	        try
 	        {
-	            //get the token changed
-	            //https://github.com/matheuss/google-translate-token#readme
-	            int index = result.IndexOf((@"TKK="), StringComparison.Ordinal);
-	            textNumber = result.GetTextBetween(@"TKK=", ";", index).Replace("\'", "").Split(new[] { '.' })[1];
+                //get the token changed
+                //https://github.com/matheuss/google-translate-token#readme
+	            int index = result.IndexOf((@"tkk:'"), StringComparison.Ordinal);
+	            textNumber = result.GetTextBetween(@"tkk:'", "\'", index).Replace("\'", "").Split(new[] { '.' })[1];
 
-	            //				int index = result.IndexOf((@"var a\x3d"), StringComparison.Ordinal);
-	            //				textNumber1 = result.GetTextBetween(@"var a\x3d", ";", index);
-	            //				textNumber2 = result.GetTextBetween(@"var b\x3d", ";", index);
+                //				int index = result.IndexOf((@"var a\x3d"), StringComparison.Ordinal);
+                //				textNumber1 = result.GetTextBetween(@"var a\x3d", ";", index);
+                //				textNumber2 = result.GetTextBetween(@"var b\x3d", ";", index);
 
 
-	            if (textNumber == null)
+                if (textNumber == null)
 	                throw new ExternalKeyParseException();
 	        }
 	        catch (ArgumentException)
